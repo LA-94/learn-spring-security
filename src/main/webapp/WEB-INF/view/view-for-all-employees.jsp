@@ -12,14 +12,14 @@
 <h3>Information for all employee</h3>
 
 
-<security:authorize access="hasRole('HR')">
+<security:authorize access="hasAuthority('HR')">
     <div>
         <button type="button" onclick="window.location.href = 'hr-info'">Salary</button>
         Only for HR staff
     </div>
 </security:authorize>
 
-<security:authorize access="hasRole('MANAGER')">
+<security:authorize access="hasAuthority('MANAGER')">
     <div>
         <button type="button" onclick="window.location.href = 'manager-info'">Performance</button>
         Only for Managers

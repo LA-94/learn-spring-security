@@ -4,46 +4,33 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.sql.DataSource;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final DataSource dataSource;
+
+    public SecurityConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        User.UserBuilder userBuilder = User.withDefaultPasswordEncoder();
-
-        UserDetails admin = userBuilder.username("admin")
-                .password("admin")
-                .roles(Roles.EMPLOYEE)
-                .build();
-
-        UserDetails alex = userBuilder.username("alex")
-                .password("alex")
-                .roles(Roles.MANAGER)
-                .build();
-
-        UserDetails tom = userBuilder.username("tom")
-                .password("tom")
-                .roles(Roles.MANAGER, Roles.HR)
-                .build();
-
-        auth.inMemoryAuthentication()
-                .withUser(admin)
-                .withUser(alex)
-                .withUser(tom);
+        auth.jdbcAuthentication()
+                .dataSource(dataSource);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/")
-                .hasAnyRole(Roles.EMPLOYEE, Roles.MANAGER, Roles.HR)
+                .hasAnyAuthority(Roles.EMPLOYEE, Roles.MANAGER, Roles.HR)
                 .antMatchers("/hr-info/**")
-                .hasRole(Roles.HR)
+                .hasAuthority(Roles.HR)
                 .antMatchers("/manager-info/**")
-                .hasRole(Roles.MANAGER)
+                .hasAuthority(Roles.MANAGER)
                 .and()
                 .formLogin()
                 .permitAll();
